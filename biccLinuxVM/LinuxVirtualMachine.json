@@ -25,8 +25,8 @@
   },
   "variables": {
     "imagePublisher": "microsoft-ads",
-    "imageOffer": "windows-data-science-vm",
-    "windowsOSVersion": "windows2016",
+    "imageOffer": "linux-data-science-vm-ubuntu",
+    "windowsOSVersion": "linuxdsvmubuntu",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
