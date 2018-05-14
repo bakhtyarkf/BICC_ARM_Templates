@@ -82,16 +82,7 @@
             "managedDisk": {
               "storageAccountType": "Premium_LRS"
             }
-          },
-          "dataDisks": [
-            {
-              "createOption": "FromImage",
-              "lun": 0,
-              "managedDisk": {
-                "storageAccountType": "Premium_LRS"
-              }
-            }
-          ]
+          }
         },
         "networkProfile": {
           "networkInterfaces": [
