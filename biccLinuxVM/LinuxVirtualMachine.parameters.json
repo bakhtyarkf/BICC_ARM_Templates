@@ -3,10 +3,13 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "adminUsername": {
-      "value": null
+      "value": "byk"
     },
     "dnsNameForPublicIP": {
-      "value": null
+      "value": "bykbicclinuxvm"
+    },
+    "adminPassword": {
+      "value": "Pass12345678"
     }
   }
 }
