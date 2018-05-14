@@ -28,6 +28,7 @@
     "imageOffer": "windows-data-science-vm",
     "windowsOSVersion": "windows2016",
     "OSDiskName": "osdiskforwindowssimple",
+    "location": "westeurope",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
@@ -48,7 +49,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('vhdStorageAccountName')]",
       "apiVersion": "2016-01-01",
-      "location": "westeurope",
+      "location": "[variables('location')]",
       "tags": {
         "displayName": "StorageAccount"
       },
@@ -61,7 +62,7 @@
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/publicIPAddresses",
       "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
       "tags": {
         "displayName": "PublicIPAddress"
       },
@@ -76,7 +77,7 @@
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
       "tags": {
         "displayName": "VirtualNetwork"
       },
@@ -100,7 +101,7 @@
       "apiVersion": "2016-03-30",
       "type": "Microsoft.Network/networkInterfaces",
       "name": "[variables('nicName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
       "tags": {
         "displayName": "NetworkInterface"
       },
@@ -129,7 +130,7 @@
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[variables('vmName')]",
-      "location": "[resourceGroup().location]",
+      "location": "[variables('location')]",
       "tags": {
         "displayName": "VirtualMachine"
       },
