@@ -48,7 +48,7 @@
       "type": "Microsoft.Storage/storageAccounts",
       "name": "[variables('vhdStorageAccountName')]",
       "apiVersion": "2016-01-01",
-      "location": "[resourceGroup().location]",
+      "location": "westeurope",
       "tags": {
         "displayName": "StorageAccount"
       },
