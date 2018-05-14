@@ -1,8 +1,8 @@
 #Requires -Version 3.0
 
 Param(
-    [string] [Parameter(Mandatory=$true)] $ResourceGroupLocation,
-    [string] $ResourceGroupName = 'biccWindowsVM',
+    [string] $ResourceGroupLocation="westeurope",
+    [string] $ResourceGroupName="bykbicctest",
     [switch] $UploadArtifacts,
     [string] $StorageAccountName,
     [string] $StorageContainerName = $ResourceGroupName.ToLowerInvariant() + '-stageartifacts',

@@ -1,12 +1,13 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
+
   "parameters": {
     "adminUsername": {
       "type": "string",
       "minLength": 1,
       "metadata": {
-        "description": "Username for the Virtual Machine."
+        "description": "User name for the Virtual Machine."
       }
     },
     "adminPassword": {
@@ -15,7 +16,7 @@
         "description": "Password for the Virtual Machine."
       }
     },
-    "vmName": {
+    "virtualMachineName": {
       "type": "string",
       "minLength": 1,
       "metadata": {
@@ -31,61 +32,86 @@
     }
   },
   "variables": {
+    "location": "West Europe",
     "imagePublisher": "microsoft-ads",
     "imageOffer": "windows-data-science-vm",
-    "windowsOSVersion": "windows2016",
-    "OSDiskName": "osdiskforwindowssimple",
-    "nicName": "myVMNic",
+    "ubuntuOSVersion": "windows2016",
+    "OSDiskName": "osdiskforlinuxsimple",
+    "networkInterfaceName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
     "vhdStorageType": "Premium_LRS",
-    "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
-    "vmSize": "Standard_DS3_v2",
-    "virtualNetworkName": "MyVNET",
+    "virtualMachineSize": "Standard_DS3_v2",
+    "virtualNetworkName": "biccDevVnet",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
     "vhdStorageAccountName": "[concat('vhdstorage', uniqueString(resourceGroup().id))]"
   },
+
+
   "resources": [
     {
-      "type": "Microsoft.Storage/storageAccounts",
-      "name": "[variables('vhdStorageAccountName')]",
-      "apiVersion": "2016-01-01",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "StorageAccount"
-      },
-      "sku": {
-        "name": "[variables('vhdStorageType')]"
-      },
-      "kind": "Storage"
-    },
-    {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "PublicIPAddress"
-      },
+      "name": "[parameters('virtualMachineName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2017-03-30",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+      ],
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        "osProfile": {
+          "computerName": "[parameters('virtualMachineName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('virtualMachineSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "microsoft-ads",
+            "offer": "windows-data-science-vm",
+            "sku": "windows2016",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Premium_LRS"
+            }
+          },
+          "dataDisks": [
+            {
+              "createOption": "FromImage",
+              "lun": 0,
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+            }
+          ]
         }
+      },
+      "plan": {
+        "name": "windows2016",
+        "publisher": "microsoft-ads",
+        "product": "windows-data-science-vm"
       }
     },
     {
-      "apiVersion": "2016-03-30",
-      "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "VirtualNetwork"
-      },
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2018-02-01",
+      "location": "[variables('location')]",
       "properties": {
         "addressSpace": {
           "addressPrefixes": [
@@ -103,28 +129,25 @@
       }
     },
     {
-      "apiVersion": "2016-03-30",
+      "name": "[variables('networkInterfaceName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "NetworkInterface"
-      },
+      "apiVersion": "2016-09-01",
+      "location": "[variables('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', parameters('dnsNameForPublicIP'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
-              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('dnsNameForPublicIP'))]"
               }
             }
           }
@@ -132,50 +155,19 @@
       }
     },
     {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('vmName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "VirtualMachine"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('vhdStorageAccountName'))]",
-        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
+      "name": "[parameters('dnsNameForPublicIP')]",
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2017-08-01",
+      "location": "[variables('location')]",
       "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[variables('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts', variables('vhdStorageAccountName')), '2016-01-01').primaryEndpoints.blob, variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-            }
-          ]
-        }
+        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
       }
     }
-  ]
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "string",
+      "value": "[parameters('adminUsername')]"
+    }
+  }
 }

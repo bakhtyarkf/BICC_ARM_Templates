@@ -6,7 +6,10 @@
       "value": "byk"
     },
     "dnsNameForPublicIP": {
-      "value": "bykbicclinuxvm"
+      "value": "bykbicclinuxvm1"
+    },
+    "virtualMachineName": {
+      "value": "byklinux"
     },
     "adminPassword": {
       "value": "Pass12345678"
