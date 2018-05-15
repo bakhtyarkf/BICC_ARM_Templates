@@ -47,7 +47,6 @@
         "sqlStorageDisksCount": 1,
         "sqlStorageDisksConfigurationType": "NEW",
         "sqlStorageStartingDeviceId": 2,
-        "sqlStorageDeploymentToken": 3141,
         "sqlAutopatchingDayOfWeek": "Sunday",
         "sqlAutopatchingStartHour": 2,
         "sqlAutopatchingWindowDuration": 60,
@@ -209,11 +208,11 @@
         },
         {
             "name": "[variables('publicIpAddressName')]",
-            "type": "Microsoft.Network/publicIpAddresses",
+            "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2017-08-01",
             "location": "[variables('location')]",
             "properties": {
-                "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+                "publicIPAllocationMethod": "[variables('publicIpAddressType')]"
             },
             "sku": {
                 "name": "[variables('publicIpAddressSku')]"

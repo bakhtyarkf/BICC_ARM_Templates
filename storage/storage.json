@@ -20,7 +20,7 @@
     "variables": {
         "location": "West Europe",
         "accountType": "Standard_RAGRS",
-        "kind": "StorageV2"
+        "kind": "BlobStorage"
     },
     "resources": [
         {
@@ -38,9 +38,6 @@
                 "encryption": {
                     "services": {
                         "blob": {
-                            "enabled": true
-                        },
-                        "file": {
                             "enabled": true
                         }
                     },
