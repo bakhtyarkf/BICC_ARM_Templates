@@ -32,23 +32,24 @@
     }
   },
   "variables": {
-    "location": "West Europe",
     "imagePublisher": "microsoft-ads",
     "imageOffer": "linux-data-science-vm-ubuntu",
-    "ubuntuOSVersion": "linuxdsvmubuntu",
-    "OSDiskName": "osdiskforlinuxsimple",
+    "OSVersion": "linuxdsvmubuntu",
+    "version": "latest",
+
+    "location": "West Europe",
     "networkInterfaceName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
-    "vhdStorageType": "Premium_LRS",
     "publicIPAddressType": "Dynamic",
-    "vhdStorageContainerName": "vhds",
-    "virtualMachineSize": "Standard_DS3_v2",
-    "virtualNetworkName": "biccDevVnet",
+    "publicIPAddressName": "[concat('biccip', uniqueString(resourceGroup().id))]",
+    "virtualNetworkName": "[concat('biccDevVnet', uniqueString(resourceGroup().id))]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
-    "vhdStorageAccountName": "[concat('vhdstorage', uniqueString(resourceGroup().id))]"
+
+    "virtualMachineSize": "Standard_DS3_v2",
+    "vhdStorageType": "Premium_LRS"
   },
 
 
@@ -102,9 +103,9 @@
         }
       },
       "plan": {
-        "name": "linuxdsvmubuntu",
-        "publisher": "microsoft-ads",
-        "product": "linux-data-science-vm-ubuntu"
+        "name": "[variables('OSVersion')]",
+        "publisher": "[variables('imagePublisher')]",
+        "product": "[variables('imageOffer')]"
       }
     },
     {
@@ -135,19 +136,19 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Network/publicIpAddresses/', parameters('dnsNameForPublicIP'))]"
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
-              "subnet": {
-                "id": "[variables('subnetRef')]"
+              "publicIPAddress": {
+                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
               },
               "privateIPAllocationMethod": "Dynamic",
-              "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('dnsNameForPublicIP'))]"
+              "subnet": {
+                "id": "[variables('subnetRef')]"
               }
             }
           }
@@ -155,12 +156,15 @@
       }
     },
     {
-      "name": "[parameters('dnsNameForPublicIP')]",
-      "type": "Microsoft.Network/publicIpAddresses",
       "apiVersion": "2017-08-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
       "location": "[variables('location')]",
       "properties": {
-        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
       }
     }
   ],

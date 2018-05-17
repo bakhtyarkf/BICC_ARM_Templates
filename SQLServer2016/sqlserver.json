@@ -73,8 +73,15 @@
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]",
                     "windowsConfiguration": {
-                        "provisionVmAgent": "true"
-                    }
+                        "provisionVmAgent": "true",
+                        "winRM": {
+                          "listeners": [
+                            {
+                              "protocol": "Http"
+                            }
+                          ]
+                        }
+                      }
                 },
                 "hardwareProfile": {
                     "vmSize": "[parameters('virtualMachineSize')]"

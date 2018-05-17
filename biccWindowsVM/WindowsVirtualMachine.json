@@ -43,7 +43,8 @@
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
     "publicIPAddressType": "Dynamic",
-    "virtualNetworkName": "biccDevVnet",
+    "publicIPAddressName": "[concat('biccip', uniqueString(resourceGroup().id))]",
+    "virtualNetworkName": "[concat('biccDevVnet', uniqueString(resourceGroup().id))]",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
 
@@ -65,7 +66,18 @@
         "osProfile": {
           "computerName": "[parameters('virtualMachineName')]",
           "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adminPassword": "[parameters('adminPassword')]",
+
+          "windowsConfiguration": {
+            "provisionVmAgent": "true",
+            "winRM": {
+              "listeners": [
+                {
+                  "protocol": "Http"
+                }
+              ]
+            }
+          }
         },
         "hardwareProfile": {
           "vmSize": "[variables('virtualMachineSize')]"
@@ -91,11 +103,6 @@
             }
           ]
         }
-      },
-      "plan": {
-        "name": "[variables('OSVersion')]",
-        "publisher": "[variables('imagePublisher')]",
-        "product": "[variables('imageOffer')]"
       }
     },
     {
@@ -126,19 +133,19 @@
       "location": "[variables('location')]",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "[concat('Microsoft.Network/publicIpAddresses/', parameters('dnsNameForPublicIP'))]"
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIPAddressName'))]"
       ],
       "properties": {
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
-              "subnet": {
-                "id": "[variables('subnetRef')]"
+              "publicIPAddress": {
+                "id": "[resourceId ('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
               },
               "privateIPAllocationMethod": "Dynamic",
-              "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('dnsNameForPublicIP'))]"
+              "subnet": {
+                "id": "[variables('subnetRef')]"
               }
             }
           }
@@ -146,12 +153,15 @@
       }
     },
     {
-      "name": "[parameters('dnsNameForPublicIP')]",
-      "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2017-08-01",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
       "location": "[variables('location')]",
       "properties": {
-        "publicIPAllocationMethod": "[variables('publicIpAddressType')]"
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+        }
       }
     }
   ],
