@@ -19,7 +19,7 @@
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
       "properties": {
-        "name": "[parameters('hostingPlanName')]",
+        "name": "[parameters('hostingPlanName')]"
       },
       "sku": {
         "name": "[variables('skuName')]",
