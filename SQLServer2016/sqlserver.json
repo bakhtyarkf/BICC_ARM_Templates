@@ -14,12 +14,6 @@
                 "Standard_DS13_v2"
             ]
         },
-        "adminUsername": {
-            "type": "string"
-        },
-        "adminPassword": {
-            "type": "securestring"
-        },
         "sqlConnectivityType": {
             "type": "string",
             "defaultValue": "Private",
@@ -28,20 +22,32 @@
                 "Private",
                 "Public"
             ]
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "dnsNameForPublicIP": {
+          "type": "string",
+          "minLength": 1,
+          "metadata": {
+            "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
+          }
         }   
     },
     "variables": {
-        "location": "resourceGroup().location",
-        "virtualNetworkName": "SqlServerVnet",
-        "networkInterfaceName": "SqlServerVnetNIC",
+        "location": "West Europe",
+        "networkInterfaceName": "SQLVMNic",
         "addressPrefix": "10.0.0.0/16",
-        "subnetPrefix": "10.0.0.0/24",
         "subnetName": "SQLSubnet",
+        "subnetPrefix": "10.0.0.0/24",
+        "publicIPAddressType": "Dynamic",
+        "virtualNetworkName": "SQLVnet",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
-        "publicIpAddressName": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]", 
-        "publicIpAddressType": "Dynamic",
-        "publicIpAddressSku": "Basic",
+
         "sqlPortNumber": 1433,
         "sqlStorageWorkloadType": "GENERAL",
         "sqlStorageDisksCount": 1,
@@ -186,36 +192,32 @@
             "location": "[variables('location')]",
             "dependsOn": [
                 "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+                "[concat('Microsoft.Network/publicIpAddresses/', parameters('dnsNameForPublicIP'))]"
             ],
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId('nnnnd','Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]"
-                            }
+                      "name": "ipconfig1",
+                      "properties": {
+                        "subnet": {
+                          "id": "[variables('subnetRef')]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIpAddress": {
+                          "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('dnsNameForPublicIP'))]"
                         }
+                      }
                     }
-                ],
-                "enableAcceleratedNetworking": true
+                ]
             }
         },
         {
-            "name": "[variables('publicIpAddressName')]",
+            "name": "[parameters('dnsNameForPublicIP')]",
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2017-08-01",
             "location": "[variables('location')]",
             "properties": {
                 "publicIPAllocationMethod": "[variables('publicIpAddressType')]"
-            },
-            "sku": {
-                "name": "[variables('publicIpAddressSku')]"
             }
         }
     ],

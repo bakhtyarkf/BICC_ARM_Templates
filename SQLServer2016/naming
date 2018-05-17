@@ -1,0 +1,1 @@
+"[concat('', uniqueString(resourceGroup().id))]"

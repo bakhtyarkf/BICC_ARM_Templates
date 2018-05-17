@@ -32,23 +32,23 @@
     }
   },
   "variables": {
-    "location": "West Europe",
     "imagePublisher": "microsoft-ads",
     "imageOffer": "windows-data-science-vm",
-    "ubuntuOSVersion": "windows2016",
-    "OSDiskName": "osdiskforlinuxsimple",
+    "OSVersion": "windows2016",
+    "version": "latest",
+
+    "location": "West Europe",
     "networkInterfaceName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
-    "vhdStorageType": "Premium_LRS",
     "publicIPAddressType": "Dynamic",
-    "vhdStorageContainerName": "vhds",
-    "virtualMachineSize": "Standard_DS3_v2",
     "virtualNetworkName": "biccDevVnet",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
-    "vhdStorageAccountName": "[concat('vhdstorage', uniqueString(resourceGroup().id))]"
+
+    "virtualMachineSize": "Standard_DS3_v2",
+    "vhdStorageType": "Premium_LRS"
   },
 
 
@@ -72,15 +72,15 @@
         },
         "storageProfile": {
           "imageReference": {
-            "publisher": "microsoft-ads",
-            "offer": "windows-data-science-vm",
-            "sku": "windows2016",
-            "version": "latest"
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('OSVersion')]",
+            "version": "[variables('version')]"
           },
           "osDisk": {
             "createOption": "FromImage",
             "managedDisk": {
-              "storageAccountType": "Premium_LRS"
+              "storageAccountType": "[variables('vhdStorageType')]"
             }
           }
         },
@@ -93,9 +93,9 @@
         }
       },
       "plan": {
-        "name": "windows2016",
-        "publisher": "microsoft-ads",
-        "product": "windows-data-science-vm"
+        "name": "[variables('OSVersion')]",
+        "publisher": "[variables('imagePublisher')]",
+        "product": "[variables('imageOffer')]"
       }
     },
     {
@@ -147,11 +147,11 @@
     },
     {
       "name": "[parameters('dnsNameForPublicIP')]",
-      "type": "Microsoft.Network/publicIpAddresses",
+      "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2017-08-01",
       "location": "[variables('location')]",
       "properties": {
-        "publicIpAllocationMethod": "[variables('publicIpAddressType')]"
+        "publicIPAllocationMethod": "[variables('publicIpAddressType')]"
       }
     }
   ],
